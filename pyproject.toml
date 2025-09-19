@@ -2,7 +2,7 @@
 name = "eduplatform"
 version = "0.1.0"
 description = "Modern microservices-based online education platform"
-authors = ["<dev@eduplatform.com>"]
+authors = ["Senior Python Developer <dev@eduplatform.com>"]
 readme = "README.md"
 packages = [
     { include = "shared" },
@@ -14,7 +14,8 @@ fastapi = "^0.104.1"
 uvicorn = {extras = ["standard"], version = "^0.24.0"}
 sqlalchemy = "^2.0.23"
 alembic = "^1.12.1"
-asyncpg = "^0.29.0"
+# asyncpg = "^0.29.0"  # Temporary disabled for Python 3.13
+psycopg = {extras = ["binary", "pool"], version = "^3.1.0"}  # Alternative PostgreSQL driver
 redis = "^5.0.1"
 celery = "^5.3.4"
 pydantic = {extras = ["email"], version = "^2.5.0"}
@@ -39,7 +40,6 @@ pillow = "^10.1.0"
 pytest = {version = "^7.4.3", optional = true}
 pytest-asyncio = {version = "^0.21.1", optional = true}
 pytest-cov = {version = "^4.1.0", optional = true}
-httpx = {version = "^0.25.2", optional = true}
 factory-boy = {version = "^3.3.0", optional = true}
 
 # Development

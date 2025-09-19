@@ -15,35 +15,35 @@
 ```mermaid
 graph TB
     Client[Web/Mobile Client] --> Gateway[API Gateway :8000]
-    
+
     Gateway --> UserSrv[User Service :8001]
     Gateway --> CourseSrv[Course Service :8002]
     Gateway --> ProgressSrv[Progress Service :8003]
     Gateway --> FileSrv[File Service :8005]
     Gateway --> CertSrv[Certificate Service :8006]
-    
+
     UserSrv --> UserDB[(Users DB)]
     CourseSrv --> CourseDB[(Courses DB)]
     ProgressSrv --> ProgressDB[(Progress DB)]
     CertSrv --> CertDB[(Certificates DB)]
-    
+
     UserSrv --> Redis[(Redis Cache)]
     CourseSrv --> Redis
     ProgressSrv --> Redis
-    
+
     UserSrv --> Kafka[Apache Kafka]
     CourseSrv --> Kafka
     ProgressSrv --> Kafka
     Kafka --> NotificationSrv[Notification Service :8004]
-    
+
     NotificationSrv --> RabbitMQ[RabbitMQ]
     RabbitMQ --> EmailWorker[Email Worker]
     RabbitMQ --> SMSWorker[SMS Worker]
     RabbitMQ --> PushWorker[Push Worker]
-    
+
     FileSrv --> MinIO[(MinIO Storage)]
     FileSrv --> VideoWorker[Video Processing Worker]
-    
+
     subgraph "Monitoring Stack"
         Prometheus[Prometheus]
         Grafana[Grafana]
@@ -98,7 +98,7 @@ make seed-data
 ```bash
 # В разных терминалах:
 make dev-api-gateway    # API Gateway на порту 8000
-make dev-user-service   # User Service на порту 8001  
+make dev-user-service   # User Service на порту 8001
 make dev-course-service # Course Service на порту 8002
 ```
 
@@ -154,7 +154,7 @@ make health-check        # Проверить статус сервисов
 
 ### 🔔 Система уведомлений
 - Email уведомления
-- SMS уведомления  
+- SMS уведомления
 - Push уведомления
 - Шаблоны сообщений
 
@@ -178,7 +178,7 @@ make health-check        # Проверить статус сервисов
 - **Alembic** - миграции базы данных
 - **Pydantic V2** - валидация данных и настройки
 
-### Базы данных  
+### Базы данных
 - **PostgreSQL** - основное хранилище данных
 - **Redis** - кэширование и сессии
 - **Elasticsearch** - полнотекстовый поиск
@@ -194,7 +194,7 @@ make health-check        # Проверить статус сервисов
 
 ### Мониторинг
 - **Prometheus** - сбор метрик
-- **Grafana** - дашборды и визуализация  
+- **Grafana** - дашборды и визуализация
 - **Структурированное логирование** - structlog
 
 ### Разработка
@@ -210,7 +210,7 @@ make health-check        # Проверить статус сервисов
 # Все тесты
 make test
 
-# Только unit тесты  
+# Только unit тесты
 make test-unit
 
 # Только integration тесты
@@ -222,7 +222,7 @@ poetry run pytest --cov=shared --cov=services --cov-report=html
 
 Тесты разделены на:
 - **Unit тесты** - изолированные компоненты
-- **Integration тесты** - взаимодействие между сервисами  
+- **Integration тесты** - взаимодействие между сервисами
 - **Performance тесты** - нагрузочное тестирование
 
 ## 📈 Мониторинг и метрики
@@ -235,7 +235,7 @@ poetry run pytest --cov=shared --cov=services --cov-report=html
 
 ### Grafana дашборды
 - Обзор платформы
-- Метрики пользователей  
+- Метрики пользователей
 - Аналитика курсов
 - Производительность сервисов
 
@@ -296,7 +296,7 @@ make prod-logs
 
 **Senior Backend навыки:**
 - ✅ Микросервисная архитектура
-- ✅ Event-driven системы  
+- ✅ Event-driven системы
 - ✅ Distributed systems patterns
 - ✅ Async/await программирование
 - ✅ Database design & optimization
@@ -318,7 +318,7 @@ make health-check
 # Посмотреть логи
 make logs
 
-# Пересоздать окружение  
+# Пересоздать окружение
 make clean && make infrastructure
 ```
 
@@ -349,6 +349,6 @@ make kafka-consume TOPIC=user.registered
 
 ---
 
-**Лицензия**: MIT  
-**Автор**: Senior Python Developer  
+**Лицензия**: MIT
+**Автор**: Larisa Shirokikh
 **Версия**: 0.1.0
