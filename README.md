@@ -1,16 +1,36 @@
-# EduPlatform 🎓
+# EduPlatform - Enterprise Microservices Learning Management System
 
-**Современная микросервисная платформа онлайн-обучения**
+## Why This Project?
 
-Комплексное backend приложение на Python:
-- Микросервисная архитектура
-- Event-driven системы (Apache Kafka)
-- Message queues (RabbitMQ)
-- Async/await программирование
-- Распределенные системы и кэширование
-- Мониторинг и наблюдаемость
+### The Problem
+Modern online education platforms face critical challenges:
+- **Monolithic architectures** that don't scale with user growth
+- **Poor performance** when handling thousands of concurrent video streams
+- **Limited real-time features** for student engagement and progress tracking
+- **Lack of reliability** - when one component fails, entire platform goes down
+- **Difficult maintenance** - changes to one feature break unrelated functionality
+- **Slow feature delivery** - all teams must coordinate for every release
 
-## 🏗️ Архитектура
+### The Solution
+EduPlatform demonstrates how to build a production-ready, scalable learning platform using:
+- **Microservices architecture** - independent services scale separately based on demand
+- **Event-driven design** - real-time notifications and progress tracking without tight coupling
+- **Async processing** - handle video uploads and processing without blocking user experience
+- **Fault tolerance** - service failures don't cascade across the entire system
+- **Independent deployment** - teams ship features without coordinating releases
+
+### What You'll Learn
+This project showcases senior-level backend development skills:
+- Designing distributed systems that handle millions of users
+- Implementing message queues and event streaming for reliability
+- Building async APIs that remain responsive under load
+- Creating proper database architectures with multiple data stores
+- Setting up monitoring and observability for production systems
+- Writing maintainable, testable code following SOLID principles
+
+## Architecture Overview
+
+**Microservices Pattern**: Each service owns its data and communicates through events
 
 ```mermaid
 graph TB
@@ -43,312 +63,293 @@ graph TB
 
     FileSrv --> MinIO[(MinIO Storage)]
     FileSrv --> VideoWorker[Video Processing Worker]
-
-    subgraph "Monitoring Stack"
-        Prometheus[Prometheus]
-        Grafana[Grafana]
-        ElasticSearch[Elasticsearch]
-    end
 ```
 
-## 🚀 Быстрый старт
+## Quick Start
 
-### Предварительные требования
+### Prerequisites
 
 - Python 3.11+
 - Poetry
 - Docker & Docker Compose
-- Make (опционально)
+- Make (optional)
 
-### Установка
+### Installation
 
-1. **Клонировать и настроить окружение:**
 ```bash
-git clone https://github.com/yourname/eduplatform.git
+# Clone repository
+git clone https://github.com/LarisaShirokikh/eduplatform_backend.git
 cd eduplatform
 
-# Установить зависимости
+# Install dependencies
 make install
-# или
+# or
 poetry install --extras all
 
-# Создать структуру проекта
+# Create project structure
 make create-structure
-```
 
-2. **Настроить переменные окружения:**
-```bash
+# Setup environment
 cp .env.example .env
-# Отредактировать .env под ваши нужды
-```
+# Edit .env with your configuration
 
-3. **Запустить инфраструктуру:**
-```bash
+# Start infrastructure
 make infrastructure
-# Подождать ~30 секунд для полной инициализации
-```
 
-4. **Инициализировать базу данных:**
-```bash
+# Initialize database
 make init-db
 make seed-data
+
+# Run services for development
+make dev-api-gateway    # API Gateway on port 8000
+make dev-user-service   # User Service on port 8001
+make dev-course-service # Course Service on port 8002
 ```
 
-5. **Запустить сервисы для разработки:**
-```bash
-# В разных терминалах:
-make dev-api-gateway    # API Gateway на порту 8000
-make dev-user-service   # User Service на порту 8001
-make dev-course-service # Course Service на порту 8002
-```
+## Key Features
 
-## 🛠️ Доступные команды
+### User Management
+- Registration and authentication with JWT
+- Role-based access control (student, instructor, admin)
+- Profile management
+- OAuth integration ready
 
-```bash
-make help                 # Показать все команды
-make infrastructure      # Запустить инфраструктуру
-make services            # Запустить все микросервисы
-make test                # Запустить тесты
-make lint                # Проверить код
-make format              # Отформатировать код
-make health-check        # Проверить статус сервисов
-```
+### Course Management
+- Course and lesson CRUD operations
+- Categories and tags
+- Pricing and discounts
+- Full-text search with Elasticsearch
 
-## 📊 Доступ к сервисам
+### Progress Tracking
+- Real-time progress updates via Kafka events
+- Learning analytics and insights
+- Time tracking per lesson/course
+- Personalized course recommendations
 
-После запуска `make infrastructure`:
+### Notification System
+- Multi-channel notifications (Email, SMS, Push)
+- Template-based messaging
+- Async processing with RabbitMQ
+- Delivery status tracking
 
-| Сервис | URL | Логин/Пароль |
-|--------|-----|--------------|
-| **API Gateway** | http://localhost:8000 | - |
-| **Grafana** | http://localhost:3000 | admin/admin |
-| **Prometheus** | http://localhost:9090 | - |
-| **RabbitMQ Management** | http://localhost:15672 | eduuser/edupass |
-| **MinIO Console** | http://localhost:9001 | eduuser/edupassword |
-| **Elasticsearch** | http://localhost:9200 | - |
+### File Management
+- Video upload and streaming
+- Automatic video transcoding (multiple qualities)
+- Thumbnail generation
+- CDN integration for fast delivery
 
-**Базы данных:**
-- PostgreSQL: `localhost:5432` (eduuser/edupass)
-- Redis: `localhost:6379`
-- Kafka: `localhost:9092`
+### Certificates
+- Automatic generation on course completion
+- PDF certificates with custom templates
+- Blockchain verification (optional)
+- Public verification endpoint
 
-## 🎯 Основные возможности
-
-### 👥 Управление пользователями
-- Регистрация и аутентификация
-- JWT токены с refresh
-- Роли: студент, инструктор, админ
-- Профили пользователей
-
-### 📚 Управление курсами
-- Создание курсов и уроков
-- Категории и теги
-- Цены и скидки
-- Поиск и фильтрация (Elasticsearch)
-
-### 📈 Отслеживание прогресса
-- Прогресс по урокам и курсам
-- Аналитика обучения
-- Времени тратится на обучение
-- Рекомендации курсов
-
-### 🔔 Система уведомлений
-- Email уведомления
-- SMS уведомления
-- Push уведомления
-- Шаблоны сообщений
-
-### 📁 Работа с файлами
-- Загрузка видео уроков
-- Обработка видео (разные качества)
-- Генерация превью
-- CDN для быстрой доставки
-
-### 🏆 Сертификаты
-- Автоматическая генерация
-- PDF сертификаты
-- Верификация в блокчейне
-- Шаблоны сертификатов
-
-## 🔧 Технический стек
+## Technology Stack
 
 ### Backend
-- **FastAPI** - современный async веб-фреймворк
-- **SQLAlchemy 2.0** - современная ORM с async поддержкой
-- **Alembic** - миграции базы данных
-- **Pydantic V2** - валидация данных и настройки
+- **FastAPI** - Modern async web framework
+- **SQLAlchemy 2.0** - Async ORM with type hints
+- **Alembic** - Database migrations
+- **Pydantic V2** - Data validation and settings
 
-### Базы данных
-- **PostgreSQL** - основное хранилище данных
-- **Redis** - кэширование и сессии
-- **Elasticsearch** - полнотекстовый поиск
+### Databases
+- **PostgreSQL** - Primary data storage
+- **Redis** - Caching and sessions
+- **Elasticsearch** - Full-text search
 
-### Брокеры сообщений
-- **Apache Kafka** - event streaming для микросервисов
-- **RabbitMQ** - очереди задач и уведомлений
+### Message Brokers
+- **Apache Kafka** - Event streaming between services
+- **RabbitMQ** - Task queues and notifications
 
-### Инфраструктура
-- **Docker & Docker Compose** - контейнеризация
-- **MinIO** - S3-совместимое файловое хранилище
-- **Celery** - фоновые задачи
+### Infrastructure
+- **Docker & Docker Compose** - Containerization
+- **MinIO** - S3-compatible object storage
+- **Celery** - Background tasks
 
-### Мониторинг
-- **Prometheus** - сбор метрик
-- **Grafana** - дашборды и визуализация
-- **Структурированное логирование** - structlog
+### Monitoring
+- **Prometheus** - Metrics collection
+- **Grafana** - Dashboards and visualization
+- **Structured logging** with structlog
 
-### Разработка
-- **Poetry** - управление зависимостями
-- **Pytest** - тестирование
-- **Black + isort** - форматирование кода
-- **MyPy** - статическая типизация
-- **Pre-commit hooks** - проверки перед коммитом
+### Development Tools
+- **Poetry** - Dependency management
+- **Pytest** - Testing framework
+- **Black + isort** - Code formatting
+- **MyPy** - Static type checking
+- **Pre-commit hooks** - Quality checks before commit
 
-## 🧪 Тестирование
+## Testing
 
 ```bash
-# Все тесты
+# Run all tests
 make test
 
-# Только unit тесты
+# Unit tests only
 make test-unit
 
-# Только integration тесты
+# Integration tests
 make test-integration
 
-# С покрытием
+# With coverage
 poetry run pytest --cov=shared --cov=services --cov-report=html
 ```
 
-Тесты разделены на:
-- **Unit тесты** - изолированные компоненты
-- **Integration тесты** - взаимодействие между сервисами
-- **Performance тесты** - нагрузочное тестирование
+Test categories:
+- **Unit tests** - Isolated component testing
+- **Integration tests** - Service interaction testing
+- **Performance tests** - Load and stress testing
 
-## 📈 Мониторинг и метрики
+## Monitoring
 
-### Prometheus метрики
-- Количество запросов по сервисам
-- Время ответа API
-- Ошибки и коды ответов
-- Использование ресурсов
+### Prometheus Metrics
+- Request count per service
+- API response times
+- Error rates and status codes
+- Resource utilization
 
-### Grafana дашборды
-- Обзор платформы
-- Метрики пользователей
-- Аналитика курсов
-- Производительность сервисов
+### Grafana Dashboards
+- Platform overview
+- User metrics
+- Course analytics
+- Service performance
 
-### Логирование
-- Структурированные логи в JSON
-- Корреляция между сервисами
-- Централизованный сбор логов
+### Logging
+- Structured JSON logs
+- Correlation IDs across services
+- Centralized log aggregation
 
-## 🔒 Безопасность
+## Security
 
-- JWT аутентификация с refresh токенами
-- Хеширование паролей с bcrypt
-- Rate limiting на уровне API Gateway
-- Валидация входных данных
-- CORS политики
-- Сканирование зависимостей на уязвимости
+- JWT authentication with refresh tokens
+- Password hashing with bcrypt
+- Rate limiting at API Gateway
+- Input validation with Pydantic
+- CORS policies
+- Dependency vulnerability scanning
 
 ```bash
-make security-scan  # Проверить безопасность
+make security-scan
 ```
 
-## 🚀 Деплой в продакшн
+## Production Deployment
 
 ```bash
-# Собрать продакшн образы
+# Build production images
 make prod-build
 
-# Задеплоить
+# Deploy
 make prod-deploy
 
-# Мониторить логи
+# Monitor logs
 make prod-logs
 ```
 
-## 📚 API Документация
+## API Documentation
 
-После запуска сервисов:
+After starting services:
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 - **OpenAPI JSON**: http://localhost:8000/openapi.json
 
-## 🤝 Разработка
+## Development Workflow
 
-### Workflow
-1. Создать feature ветку
-2. Разработать функционал
-3. Написать тесты
-4. Запустить `make lint` и `make test`
-5. Создать Pull Request
+1. Create feature branch
+2. Develop functionality
+3. Write tests
+4. Run `make lint` and `make test`
+5. Create Pull Request
 
-### Добавление нового сервиса
-1. Создать директорию в `services/`
-2. Добавить в `docker-compose.yml`
-3. Настроить роутинг в API Gateway
-4. Добавить тесты и документацию
+## Skills Demonstrated
 
-## 🎓 Что демонстрирует этот проект
+This project showcases production-ready backend development:
 
-**Senior Backend навыки:**
-- ✅ Микросервисная архитектура
-- ✅ Event-driven системы
-- ✅ Distributed systems patterns
-- ✅ Async/await программирование
-- ✅ Database design & optimization
-- ✅ Caching strategies
-- ✅ Message queues & streaming
-- ✅ Monitoring & observability
-- ✅ Testing strategies
-- ✅ Security best practices
-- ✅ CI/CD готовность
-- ✅ Documentation
+- **Microservices Architecture** - Service decomposition and boundaries
+- **Event-Driven Design** - Kafka for service communication
+- **Async Programming** - Non-blocking I/O with Python asyncio
+- **Database Design** - Multi-database architecture per service
+- **Caching Strategies** - Redis for performance optimization
+- **Message Queues** - RabbitMQ for task processing
+- **API Design** - RESTful APIs with proper status codes
+- **Authentication** - JWT with refresh tokens
+- **Testing** - Unit, integration, and performance tests
+- **Monitoring** - Metrics, logs, and dashboards
+- **DevOps** - Docker, CI/CD readiness
+- **Documentation** - Comprehensive technical docs
 
-## 🐛 Устранение неполадок
+## Troubleshooting
 
-### Проблемы с запуском
+### Service Issues
 ```bash
-# Проверить статус сервисов
-make health-check
-
-# Посмотреть логи
-make logs
-
-# Пересоздать окружение
-make clean && make infrastructure
+make health-check  # Check all services
+make logs          # View logs
+make clean && make infrastructure  # Rebuild environment
 ```
 
-### Проблемы с базой данных
+### Database Issues
 ```bash
-# Подключиться к БД
-make db-shell
-
-# Пересоздать миграции
+make db-shell      # Connect to database
 make create-migration MESSAGE="fix issue"
-make migrate
+make migrate       # Apply migrations
 ```
 
-### Проблемы с Kafka
+### Kafka Issues
 ```bash
-# Посмотреть топики
-make kafka-topics
-
-# Читать сообщения
-make kafka-consume TOPIC=user.registered
+make kafka-topics  # List topics
+make kafka-consume TOPIC=user.registered  # Read messages
 ```
 
-## 📞 Поддержка
+## Available Commands
 
-- **Issues**: GitHub Issues
-- **Документация**: `/docs` директория
-- **Мониторинг**: Grafana дашборды
+```bash
+make help                 # Show all commands
+make infrastructure      # Start infrastructure
+make services            # Start all microservices
+make test                # Run tests
+make lint                # Check code quality
+make format              # Format code
+make health-check        # Check service status
+```
 
----
+## Service Endpoints
 
-**Лицензия**: MIT
-**Автор**: Larisa Shirokikh
-**Версия**: 0.1.0
+After running `make infrastructure`:
+
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| **API Gateway** | http://localhost:8000 | - |
+| **Grafana** | http://localhost:3000 | admin/admin |
+| **Prometheus** | http://localhost:9090 | - |
+| **RabbitMQ** | http://localhost:15672 | eduuser/edupass |
+| **MinIO** | http://localhost:9001 | eduuser/edupassword |
+| **Elasticsearch** | http://localhost:9200 | - |
+
+**Databases:**
+- PostgreSQL: `localhost:5432` (eduuser/edupass)
+- Redis: `localhost:6379`
+- Kafka: `localhost:9092`
+
+## Contributing
+
+Contributions welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Ensure all tests pass
+5. Submit a Pull Request
+
+## License
+
+MIT License - see LICENSE file for details
+
+## Author
+
+**Larisa Shirokikh**
+- GitHub: [@LarisaShirokikh](https://github.com/LarisaShirokikh)
+- Email: larisashirokikh@yandex.ru
+
+## Project Status
+
+**Version**: 0.1.0
+**Status**: Active Development
+
+This is a portfolio project demonstrating enterprise-level backend development skills for senior engineering positions.
