@@ -1,0 +1,71 @@
+.
+├── .env
+├── .gitignore
+├── .pre-commit-config.yaml
+├── alembic
+│   ├── env.py
+│   ├── script.py.mako
+│   └── versions
+│       └── 001_create_users_table.py
+├── alembic.ini
+├── docker-compose.yml
+├── Makefile
+├── poetry.lock
+├── pyproject.toml
+├── README.md
+├── scripts
+│   ├── init_db.py
+│   └── seed_data.py
+├── services
+│   └── user_service
+│       ├── app
+│       │   ├── __init__.py
+│       │   ├── api
+│       │   ├── models
+│       │   │   ├── __init__.py
+│       │   │   └── user.py
+│       │   ├── repositories
+│       │   │   ├── __init__.py
+│       │   │   └── user_repository.py
+│       │   ├── routes
+│       │   │   └── auth.py
+│       │   ├── schemas
+│       │   │   ├── __init__.py
+│       │   │   └── user.py
+│       │   └── services
+│       │       ├── __init__.py
+│       │       ├── auth_service.py
+│       │       └── main.py
+│       └── main.py
+├── shared
+│   ├── __init__.py
+│   ├── config
+│   │   ├── __init__.py
+│   │   ├── base.py
+│   │   ├── database.py
+│   │   ├── kafka.py
+│   │   ├── rabbitmq.py
+│   │   └── redis.py
+│   ├── database
+│   │   ├── __init__.py
+│   │   ├── base.py
+│   │   ├── connection.py
+│   │   └── repository.py
+│   ├── events
+│   │   ├── __init__.py
+│   │   ├── base.py
+│   │   ├── course_events.py
+│   │   ├── file_notification_events.py
+│   │   ├── progress_events.py
+│   │   └── user_events.py
+│   ├── exceptions
+│   │   ├── __init__.py
+│   │   ├── auth.py
+│   │   └── base.py
+│   └── utils
+│       ├── __init__.py
+│       ├── security.py
+│       └── validators.py
+└── structure.txt
+
+19 directories, 50 files

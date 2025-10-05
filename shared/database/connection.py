@@ -49,7 +49,12 @@ class DatabaseConnection:
         if self._engine is None:
             self._engine = create_async_engine(
                 self._database_url,
-                **db_config.engine_options,
+                pool_size=db_config.db_pool_size,
+                max_overflow=db_config.db_max_overflow,
+                pool_timeout=db_config.db_pool_timeout,
+                pool_recycle=db_config.db_pool_recycle,
+                pool_pre_ping=db_config.db_pool_pre_ping,
+                echo=db_config.db_echo,
             )
         return self._engine
 
@@ -78,7 +83,7 @@ class DatabaseConnection:
     @asynccontextmanager
     async def session(self) -> AsyncGenerator[AsyncSession, None]:
         """
-            Context manager for working with the session of the DB.
+        Context manager for working with the session of the DB.
 
         Yields:
             AsyncSession: Session of the DB
@@ -113,7 +118,9 @@ class DatabaseConnection:
         """
         try:
             async with self.session() as session:
-                await session.execute("SELECT 1")
+                from sqlalchemy import text
+
+                await session.execute(text("SELECT 1"))
             return True
         except Exception:
             return False

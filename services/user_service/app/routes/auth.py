@@ -2,10 +2,16 @@
 Authentication API routes.
 """
 
-from fastapi import APIRouter, Depends, status
+import uuid
+
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas.user import (
+from services.user_service.app.repositories.user_repository import UserRepository
+from services.user_service.app.services.email_service import EmailVerificationService
+from shared.database import get_db_session
+
+from ..schemas.user import (
     EmailVerificationRequest,
     LoginResponse,
     RefreshTokenRequest,
@@ -14,8 +20,7 @@ from app.schemas.user import (
     UserRegisterRequest,
     UserResponse,
 )
-from app.services.auth_service import AuthService
-from shared.database import get_db_session
+from ..services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -108,6 +113,24 @@ async def verify_email(
 
     Returns updated user profile.
     """
-    # TODO: Implement token verification logic
-    # For now, this is a placeholder
-    pass
+    # Verify token
+    payload = EmailVerificationService.verify_token(verification_data.token)
+
+    if not payload:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired verification token",
+        )
+
+    user_id = payload.get("sub")
+
+    # Update user verification status
+    repo = UserRepository(session)
+    user = await repo.verify_email(uuid.UUID(user_id))
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
+
+    return user
