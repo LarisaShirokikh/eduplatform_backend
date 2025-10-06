@@ -223,3 +223,5 @@ zookeeper_data/
 # Generated files
 openapi.json
 *.generated.py
+
+task.py
