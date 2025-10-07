@@ -14,12 +14,14 @@ from alembic import context
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from shared.config import db_config
-from shared.database import Base
+from services.course_service.app.models.course import Course
+from services.course_service.app.models.lesson import Lesson
 
 # Import all models so Alembic can detect them
 # TODO: Uncomment when models are created
-# from services.user_service.app.models.user import User  # noqa
+from services.user_service.app.models.user import User  # noqa
+from shared.config import db_config
+from shared.database import Base
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
