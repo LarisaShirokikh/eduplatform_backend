@@ -2,8 +2,11 @@
 Proxy routes for forwarding requests to microservices.
 """
 
+import time
+from collections import defaultdict
+
 import httpx
-from fastapi import APIRouter, Request, Response, status
+from fastapi import APIRouter, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
 
 from ..config import gateway_config
@@ -13,9 +16,57 @@ router = APIRouter()
 # HTTP client для проксирования запросов
 http_client = httpx.AsyncClient(timeout=30.0)
 
+# In-memory rate limiting storage
+rate_limit_storage = defaultdict(list)
+RATE_LIMIT = 10  # requests per minute
+
+
+def check_rate_limit(client_ip: str, limit: int = RATE_LIMIT) -> bool:
+    """
+    Check if client exceeded rate limit.
+
+    Returns:
+        bool: True if limit exceeded
+    """
+    now = time.time()
+
+    # Clean old requests
+    rate_limit_storage[client_ip] = [
+        req_time for req_time in rate_limit_storage[client_ip] if now - req_time < 60
+    ]
+
+    request_count = len(rate_limit_storage[client_ip])
+    print(f"DEBUG: Client {client_ip} has {request_count} requests, limit is {limit}")
+
+    # Check limit
+    if request_count >= limit:
+        print(f"DEBUG: RATE LIMIT EXCEEDED for {client_ip}")
+        return True
+
+    # Add current request
+    rate_limit_storage[client_ip].append(now)
+    print(
+        f"DEBUG: Added request for {client_ip}, now has {len(rate_limit_storage[client_ip])} requests"
+    )
+    return False
+
 
 async def proxy_request(request: Request, target_url: str, path: str) -> Response:
     """Proxy request to target service."""
+    print(f"DEBUG: proxy_request called for {path}")
+    # Check rate limit
+    client_ip = request.client.host
+    print(f"DEBUG: Checking rate limit for {client_ip}")
+    if check_rate_limit(client_ip):
+        print(f"DEBUG: Rate limit exceeded, raising 429")
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "error": "rate_limit_exceeded",
+                "message": "Too many requests. Please try again later.",
+            },
+        )
+    print(f"DEBUG: Rate limit OK, proxying request")
     # Построить полный URL
     url = f"{target_url}{path}"
 
@@ -58,7 +109,7 @@ async def proxy_request(request: Request, target_url: str, path: str) -> Respons
         )
 
 
-# Auth routes - без {path:path}, с конкретными endpoints
+# Auth routes
 @router.post("/api/v1/auth/register", tags=["User Service - Auth"])
 async def proxy_auth_register(request: Request):
     """Proxy register to User Service."""
