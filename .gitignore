@@ -225,3 +225,4 @@ openapi.json
 *.generated.py
 
 task.py
+logs/*.log

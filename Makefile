@@ -241,5 +241,34 @@ clean-cache: ## Очистить кэши Python
 clean-logs: ## Очистить логи Docker
 	docker system prune --volumes -f
 
+# Запуск локальных сервисов
+run-user: ## Запустить User Service локально
+	poetry run uvicorn services.user_service.main:app --reload --port 8001
+
+run-course: ## Запустить Course Service локально
+	poetry run uvicorn services.course_service.main:app --reload --port 8002
+
+run-gateway: ## Запустить API Gateway локально
+	poetry run uvicorn services.api_gateway.main:app --reload --port 8000
+
+run-all-local: ## Запустить все сервисы локально (в фоне)
+	@echo "$(GREEN)Starting all services locally...$(NC)"
+	@poetry run uvicorn services.user_service.main:app --port 8001 > logs/user-service.log 2>&1 &
+	@poetry run uvicorn services.course_service.main:app --port 8002 > logs/course-service.log 2>&1 &
+	@poetry run uvicorn services.api_gateway.main:app --port 8000 > logs/gateway.log 2>&1 &
+	@echo "$(GREEN)All services started!$(NC)"
+	@echo "User Service: http://localhost:8001/docs"
+	@echo "Course Service: http://localhost:8002/docs"
+	@echo "API Gateway: http://localhost:8000/docs"
+	@echo ""
+	@echo "Logs: tail -f logs/*.log"
+
+stop-local: ## Остановить все локальные сервисы
+	@echo "$(RED)Stopping local services...$(NC)"
+	@pkill -f "uvicorn services" || true
+
+logs-local: ## Показать логи локальных сервисов
+	tail -f logs/*.log
+
 # По умолчанию показываем help
 .DEFAULT_GOAL := help

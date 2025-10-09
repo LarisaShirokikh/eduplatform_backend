@@ -18,47 +18,29 @@ http_client = httpx.AsyncClient(timeout=30.0)
 
 # In-memory rate limiting storage
 rate_limit_storage = defaultdict(list)
-RATE_LIMIT = 10  # requests per minute
+RATE_LIMIT = 100  # requests per minute
 
 
 def check_rate_limit(client_ip: str, limit: int = RATE_LIMIT) -> bool:
-    """
-    Check if client exceeded rate limit.
-
-    Returns:
-        bool: True if limit exceeded
-    """
+    """Check if client exceeded rate limit."""
     now = time.time()
-
-    # Clean old requests
     rate_limit_storage[client_ip] = [
         req_time for req_time in rate_limit_storage[client_ip] if now - req_time < 60
     ]
 
-    request_count = len(rate_limit_storage[client_ip])
-    print(f"DEBUG: Client {client_ip} has {request_count} requests, limit is {limit}")
-
-    # Check limit
-    if request_count >= limit:
-        print(f"DEBUG: RATE LIMIT EXCEEDED for {client_ip}")
+    if len(rate_limit_storage[client_ip]) >= limit:
         return True
 
-    # Add current request
     rate_limit_storage[client_ip].append(now)
-    print(
-        f"DEBUG: Added request for {client_ip}, now has {len(rate_limit_storage[client_ip])} requests"
-    )
     return False
 
 
 async def proxy_request(request: Request, target_url: str, path: str) -> Response:
     """Proxy request to target service."""
-    print(f"DEBUG: proxy_request called for {path}")
+
     # Check rate limit
     client_ip = request.client.host
-    print(f"DEBUG: Checking rate limit for {client_ip}")
     if check_rate_limit(client_ip):
-        print(f"DEBUG: Rate limit exceeded, raising 429")
         raise HTTPException(
             status_code=429,
             detail={
@@ -66,22 +48,14 @@ async def proxy_request(request: Request, target_url: str, path: str) -> Respons
                 "message": "Too many requests. Please try again later.",
             },
         )
-    print(f"DEBUG: Rate limit OK, proxying request")
-    # Построить полный URL
+
     url = f"{target_url}{path}"
-
-    # Получить query параметры
     query_params = dict(request.query_params)
-
-    # Получить заголовки (исключая host)
     headers = dict(request.headers)
     headers.pop("host", None)
 
     try:
-        # Получить тело запроса
         body = await request.body()
-
-        # Проксировать запрос
         response = await http_client.request(
             method=request.method,
             url=url,
@@ -90,7 +64,6 @@ async def proxy_request(request: Request, target_url: str, path: str) -> Respons
             content=body,
         )
 
-        # Вернуть ответ
         return Response(
             content=response.content,
             status_code=response.status_code,
@@ -109,59 +82,42 @@ async def proxy_request(request: Request, target_url: str, path: str) -> Respons
         )
 
 
-# Auth routes
-@router.post("/api/v1/auth/register", tags=["User Service - Auth"])
-async def proxy_auth_register(request: Request):
-    """Proxy register to User Service."""
-    return await proxy_request(
-        request, gateway_config.user_service_url, "/api/v1/auth/register"
-    )
+# Универсальный роут для всех сервисов
+@router.api_route(
+    "/api/v1/{service}/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
+    tags=["Proxy"],
+)
+async def universal_proxy(request: Request, service: str, path: str = ""):
+    """
+    Universal proxy for all microservices.
 
+    Routes requests based on service name:
+    - /api/v1/auth/* -> User Service
+    - /api/v1/users/* -> User Service
+    - /api/v1/courses/* -> Course Service
+    """
+    # Map service names to URLs
+    service_map = {
+        "auth": gateway_config.user_service_url,
+        "users": gateway_config.user_service_url,
+        "courses": gateway_config.course_service_url,
+        "lessons": gateway_config.course_service_url,
+        "progress": gateway_config.progress_service_url,
+        "notifications": gateway_config.notification_service_url,
+    }
 
-@router.post("/api/v1/auth/login", tags=["User Service - Auth"])
-async def proxy_auth_login(request: Request):
-    """Proxy login to User Service."""
-    return await proxy_request(
-        request, gateway_config.user_service_url, "/api/v1/auth/login"
-    )
+    target_url = service_map.get(service)
 
+    if not target_url:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Service '{service}' not found",
+        )
 
-@router.post("/api/v1/auth/refresh", tags=["User Service - Auth"])
-async def proxy_auth_refresh(request: Request):
-    """Proxy refresh token to User Service."""
-    return await proxy_request(
-        request, gateway_config.user_service_url, "/api/v1/auth/refresh"
-    )
+    # Reconstruct full path
+    full_path = f"/api/v1/{service}"
+    if path:
+        full_path = f"{full_path}/{path}"
 
-
-@router.post("/api/v1/auth/verify-email", tags=["User Service - Auth"])
-async def proxy_auth_verify(request: Request):
-    """Proxy email verification to User Service."""
-    return await proxy_request(
-        request, gateway_config.user_service_url, "/api/v1/auth/verify-email"
-    )
-
-
-# User routes
-@router.get("/api/v1/users/me", tags=["User Service - Users"])
-async def proxy_get_me(request: Request):
-    """Proxy get current user to User Service."""
-    return await proxy_request(
-        request, gateway_config.user_service_url, "/api/v1/users/me"
-    )
-
-
-@router.put("/api/v1/users/me", tags=["User Service - Users"])
-async def proxy_update_me(request: Request):
-    """Proxy update current user to User Service."""
-    return await proxy_request(
-        request, gateway_config.user_service_url, "/api/v1/users/me"
-    )
-
-
-@router.delete("/api/v1/users/me", tags=["User Service - Users"])
-async def proxy_delete_me(request: Request):
-    """Proxy delete current user to User Service."""
-    return await proxy_request(
-        request, gateway_config.user_service_url, "/api/v1/users/me"
-    )
+    return await proxy_request(request, target_url, full_path)
