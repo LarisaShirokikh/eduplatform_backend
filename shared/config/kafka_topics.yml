@@ -1,0 +1,71 @@
+# Kafka Topics Configuration
+topics:
+  # User Service Events
+  - name: user.registered
+    description: "User registration events"
+    partitions: 3
+    replication_factor: 1
+
+  - name: user.login
+    description: "User login events"
+    partitions: 3
+    replication_factor: 1
+
+  - name: user.updated
+    description: "User profile update events"
+    partitions: 3
+    replication_factor: 1
+
+  - name: user.deleted
+    description: "User account deletion events"
+    partitions: 3
+    replication_factor: 1
+
+  # Course Service Events
+  - name: course.created
+    description: "Course creation events"
+    partitions: 3
+    replication_factor: 1
+
+  - name: course.updated
+    description: "Course update events"
+    partitions: 3
+    replication_factor: 1
+
+  - name: course.published
+    description: "Course publication events"
+    partitions: 3
+    replication_factor: 1
+
+  - name: course.deleted
+    description: "Course deletion events"
+    partitions: 3
+    replication_factor: 1
+
+  # Enrollment Events
+  - name: enrollment.created
+    description: "Student enrollment events"
+    partitions: 3
+    replication_factor: 1
+
+  - name: enrollment.completed
+    description: "Course completion events"
+    partitions: 3
+    replication_factor: 1
+
+  # Progress Events
+  - name: progress.updated
+    description: "Learning progress update events"
+    partitions: 3
+    replication_factor: 1
+
+  - name: progress.milestone
+    description: "Learning milestone events"
+    partitions: 3
+    replication_factor: 1
+
+  # Notification Events
+  - name: notification.send
+    description: "Notification send requests"
+    partitions: 3
+    replication_factor: 1

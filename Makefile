@@ -89,6 +89,10 @@ init-db: ## Инициализировать базу данных
 	poetry run python scripts/init_db.py
 	poetry run alembic upgrade head
 
+kafka-init-topics: ## Создать все необходимые Kafka топики из конфигурации
+	@echo "$(GREEN)Initializing Kafka topics from config...$(NC)"
+	poetry run python scripts/init_kafka_topics.py
+
 seed-data: ## Загрузить тестовые данные
 	@echo "$(GREEN)Seeding test data...$(NC)"
 	poetry run python scripts/seed_data.py
@@ -155,7 +159,7 @@ kafka-consume: ## Читать сообщения из топика (make kafka-
 		echo "$(RED)Please specify TOPIC: make kafka-consume TOPIC=user.registered$(NC)"; \
 		exit 1; \
 	fi
-	docker exec -it $(docker-compose ps -q kafka) kafka-console-consumer --bootstrap-server localhost:9092 --topic $(TOPIC) --from-beginning
+	docker exec -it $$(docker ps -q -f name=kafka) kafka-console-consumer --bootstrap-server localhost:9092 --topic $(TOPIC) --from-beginning
 
 # База данных операции
 db-shell: ## Подключиться к PostgreSQL
@@ -251,10 +255,14 @@ run-course: ## Запустить Course Service локально
 run-gateway: ## Запустить API Gateway локально
 	poetry run uvicorn services.api_gateway.main:app --reload --port 8000
 
+run-notification: ## Запустить Notification Service локально
+	poetry run uvicorn services.notification_service.main:app --reload --port 8003
+
 run-all-local: ## Запустить все сервисы локально (в фоне)
 	@echo "$(GREEN)Starting all services locally...$(NC)"
 	@poetry run uvicorn services.user_service.main:app --port 8001 > logs/user-service.log 2>&1 &
 	@poetry run uvicorn services.course_service.main:app --port 8002 > logs/course-service.log 2>&1 &
+	@poetry run uvicorn services.notification_service.main:app --port 8003 > logs/notification-service.log 2>&1 &
 	@poetry run uvicorn services.api_gateway.main:app --port 8000 > logs/gateway.log 2>&1 &
 	@echo "$(GREEN)All services started!$(NC)"
 	@echo "User Service: http://localhost:8001/docs"

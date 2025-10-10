@@ -3,44 +3,144 @@
 ├── .gitignore
 ├── .pre-commit-config.yaml
 ├── alembic
+│   ├── __pycache__
+│   │   └── env.cpython-313.pyc
 │   ├── env.py
 │   ├── script.py.mako
 │   └── versions
-│       └── 001_create_users_table.py
+│       ├── __pycache__
+│       │   ├── 001_create_users_table.cpython-313.pyc
+│       │   ├── 2025_10_07_1055-02e68e56741d_create_courses_and_lessons_tables.cpython-313.pyc
+│       │   ├── 2025_10_07_1104-5b2116f52070_add_courses_and_lessons_tables.cpython-313.pyc
+│       │   └── 2025_10_07_1106-e9eefc91f7a4_add_courses_and_lessons_tables.cpython-313.pyc
+│       ├── 001_create_users_table.py
+│       └── 2025_10_07_1106-e9eefc91f7a4_add_courses_and_lessons_tables.py
 ├── alembic.ini
 ├── docker-compose.yml
+├── logs
+│   ├── course-service.log
+│   ├── gateway.log
+│   └── user-service.log
 ├── Makefile
 ├── poetry.lock
 ├── pyproject.toml
 ├── README.md
+├── README.mdgit
 ├── scripts
 │   ├── init_db.py
 │   └── seed_data.py
 ├── services
+│   ├── api_gateway
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-313.pyc
+│   │   │   └── main.cpython-313.pyc
+│   │   ├── app
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   └── config.cpython-313.pyc
+│   │   │   ├── config.py
+│   │   │   ├── middleware
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── __pycache__
+│   │   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   │   └── rate_limit.cpython-313.pyc
+│   │   │   │   ├── auth.py
+│   │   │   │   └── rate_limit.py
+│   │   │   └── routes
+│   │   │       ├── __init__.py
+│   │   │       ├── __pycache__
+│   │   │       │   ├── __init__.cpython-313.pyc
+│   │   │       │   └── proxy.cpython-313.pyc
+│   │   │       └── proxy.py
+│   │   └── main.py
+│   ├── course_service
+│   │   ├── __pycache__
+│   │   │   └── main.cpython-313.pyc
+│   │   ├── app
+│   │   │   ├── models
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── __pycache__
+│   │   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   │   ├── course.cpython-313.pyc
+│   │   │   │   │   └── lesson.cpython-313.pyc
+│   │   │   │   ├── course.py
+│   │   │   │   └── lesson.py
+│   │   │   ├── repositories
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── __pycache__
+│   │   │   │   │   └── course_repository.cpython-313.pyc
+│   │   │   │   └── course_repository.py
+│   │   │   ├── routes
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── __pycache__
+│   │   │   │   │   ├── __init__.cpython-313.pyc
+│   │   │   │   │   └── courses.cpython-313.pyc
+│   │   │   │   └── courses.py
+│   │   │   ├── schemas
+│   │   │   │   ├── __pycache__
+│   │   │   │   │   └── course.cpython-313.pyc
+│   │   │   │   └── course.py
+│   │   │   └── services
+│   │   │       ├── __init__.py
+│   │   │       └── course_service.py
+│   │   └── main.py
 │   └── user_service
+│       ├── __pycache__
+│       │   └── main.cpython-313.pyc
 │       ├── app
 │       │   ├── __init__.py
+│       │   ├── __pycache__
+│       │   │   └── __init__.cpython-313.pyc
 │       │   ├── api
 │       │   ├── models
 │       │   │   ├── __init__.py
+│       │   │   ├── __pycache__
+│       │   │   │   ├── __init__.cpython-313.pyc
+│       │   │   │   └── user.cpython-313.pyc
 │       │   │   └── user.py
 │       │   ├── repositories
 │       │   │   ├── __init__.py
+│       │   │   ├── __pycache__
+│       │   │   │   ├── __init__.cpython-313.pyc
+│       │   │   │   └── user_repository.cpython-313.pyc
 │       │   │   └── user_repository.py
 │       │   ├── routes
-│       │   │   └── auth.py
+│       │   │   ├── __pycache__
+│       │   │   │   ├── auth.cpython-313.pyc
+│       │   │   │   └── users.cpython-313.pyc
+│       │   │   ├── auth.py
+│       │   │   └── users.py
 │       │   ├── schemas
 │       │   │   ├── __init__.py
+│       │   │   ├── __pycache__
+│       │   │   │   ├── __init__.cpython-313.pyc
+│       │   │   │   └── user.cpython-313.pyc
 │       │   │   └── user.py
 │       │   └── services
 │       │       ├── __init__.py
+│       │       ├── __pycache__
+│       │       │   ├── __init__.cpython-313.pyc
+│       │       │   ├── auth_service.cpython-313.pyc
+│       │       │   └── email_service.cpython-313.pyc
 │       │       ├── auth_service.py
+│       │       ├── email_service.py
 │       │       └── main.py
 │       └── main.py
 ├── shared
 │   ├── __init__.py
+│   ├── __pycache__
+│   │   └── __init__.cpython-313.pyc
 │   ├── config
 │   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-313.pyc
+│   │   │   ├── base.cpython-313.pyc
+│   │   │   ├── database.cpython-313.pyc
+│   │   │   ├── kafka.cpython-313.pyc
+│   │   │   ├── rabbitmq.cpython-313.pyc
+│   │   │   └── redis.cpython-313.pyc
 │   │   ├── base.py
 │   │   ├── database.py
 │   │   ├── kafka.py
@@ -48,11 +148,29 @@
 │   │   └── redis.py
 │   ├── database
 │   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-313.pyc
+│   │   │   ├── base.cpython-313.pyc
+│   │   │   ├── connection.cpython-313.pyc
+│   │   │   └── repository.cpython-313.pyc
 │   │   ├── base.py
 │   │   ├── connection.py
 │   │   └── repository.py
+│   ├── dependencies
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-313.pyc
+│   │   │   └── auth.cpython-313.pyc
+│   │   └── auth.py
 │   ├── events
 │   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-313.pyc
+│   │   │   ├── base.cpython-313.pyc
+│   │   │   ├── course_events.cpython-313.pyc
+│   │   │   ├── file_notification_events.cpython-313.pyc
+│   │   │   ├── progress_events.cpython-313.pyc
+│   │   │   └── user_events.cpython-313.pyc
 │   │   ├── base.py
 │   │   ├── course_events.py
 │   │   ├── file_notification_events.py
@@ -60,12 +178,23 @@
 │   │   └── user_events.py
 │   ├── exceptions
 │   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-313.pyc
+│   │   │   ├── auth.cpython-313.pyc
+│   │   │   └── base.cpython-313.pyc
 │   │   ├── auth.py
 │   │   └── base.py
+│   ├── messaging
+│   │   ├── __init__.py
+│   │   └── kafka_producer.py
 │   └── utils
 │       ├── __init__.py
+│       ├── __pycache__
+│       │   ├── __init__.cpython-313.pyc
+│       │   ├── security.cpython-313.pyc
+│       │   └── validators.cpython-313.pyc
 │       ├── security.py
 │       └── validators.py
 └── structure.txt
 
-19 directories, 50 files
+61 directories, 137 files

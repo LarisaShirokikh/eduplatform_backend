@@ -16,6 +16,7 @@ from shared.exceptions import (
     InvalidCredentialsError,
     InvalidTokenError,
 )
+from shared.messaging.kafka_producer import get_kafka_producer
 from shared.utils import password_hasher, token_manager
 
 from ..models.user import User
@@ -79,6 +80,8 @@ class AuthService:
             user.id, user.email
         )
 
+        kafka_producer = await get_kafka_producer()
+
         # Emit user registered event
         event = UserRegisteredEvent(
             user_id=user.id,
@@ -87,7 +90,13 @@ class AuthService:
             role=user.role,
             is_verified=user.is_verified,
         )
-        # TODO: Publish event to Kafka
+        # Send to Kafka
+        await kafka_producer.send_event(
+            topic="user.registered",
+            event_data=event.model_dump(mode="json"),
+            key=str(user.id),
+        )
+        print(f"Event sent to Kafka: user.registered")
         print(f"Verification token for {user.email}: {verification_token}")
         print(
             f"Verification URL: http://localhost:8001/api/v1/auth/verify-email?token={verification_token}"

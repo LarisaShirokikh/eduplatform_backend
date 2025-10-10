@@ -1,66 +1,73 @@
 """
-User Service - FastAPI application.
+User Service - Manages users and authentication.
 """
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from shared.config import get_app_config
-from shared.exceptions import EduPlatformException
+from shared.config import config
+from shared.messaging.kafka_producer import get_kafka_producer
 
 from .app.routes import auth, users
-
-app_config = get_app_config()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    """Startup and shutdown events."""
     print("Starting User Service...")
+
+    # Start Kafka producer
+    kafka_producer = await get_kafka_producer()
+    await kafka_producer.start()
+
     yield
+
+    # Stop Kafka producer
+    await kafka_producer.stop()
     print("Shutting down User Service...")
 
 
-app = FastAPI(
-    title="EduPlatform User Service",
-    description="User authentication and management",
-    version="0.1.0",
-    lifespan=lifespan,
-)
+def create_app() -> FastAPI:
+    """Create and configure FastAPI application."""
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=app_config.base.cors_origins_list,
-    allow_credentials=True,
-    allow_methods=app_config.base.cors_methods_list,
-    allow_headers=["*"],
-)
-
-
-@app.exception_handler(EduPlatformException)
-async def eduplatform_exception_handler(request: Request, exc: EduPlatformException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content=exc.to_dict(),
+    app = FastAPI(
+        title="User Service API",
+        description="User management and authentication service for EduPlatform",
+        version="0.1.0",
+        docs_url="/docs",
+        redoc_url="/redoc",
+        lifespan=lifespan,
     )
 
+    # CORS middleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=config.cors_origins_list,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
-@app.get("/health", tags=["Health"])
-async def health_check():
-    return {
-        "status": "healthy",
-        "service": "user-service",
-        "version": "0.1.0",
-    }
+    # Include routers
+    app.include_router(auth.router, prefix="/api/v1")
+    app.include_router(users.router, prefix="/api/v1")
+
+    # Health check endpoint
+    @app.get("/health", tags=["Health"])
+    async def health_check():
+        """Health check endpoint."""
+        return JSONResponse(
+            content={
+                "status": "healthy",
+                "service": "user-service",
+                "version": "0.1.0",
+            }
+        )
+
+    return app
 
 
-app.include_router(auth.router, prefix="/api/v1")
-app.include_router(users.router, prefix="/api/v1")
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
+app = create_app()
