@@ -5,6 +5,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from services.user_service.app.repositories.user_repository import UserRepository
 from shared.config import config
 from shared.database import get_db_session
 
@@ -68,11 +69,9 @@ async def get_current_user(
     Raises:
         HTTPException: If user not found or inactive
     """
-    # Import here to avoid circular dependency
-    from services.user_service.app.repositories.user_repository import UserRepository
 
     repo = UserRepository(session)
-    user = await repo.get(user_id)
+    user = await repo.get_by_id(user_id)
 
     if not user:
         raise HTTPException(
