@@ -2,7 +2,15 @@
 Event handlers for user events.
 """
 
+import uuid
 from typing import Any
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from shared.database import get_db_session
+
+from ..models.notification import NotificationType
+from ..repositories.notification_repository import NotificationRepository
 
 
 class UserEventHandler:
@@ -18,15 +26,35 @@ class UserEventHandler:
         user_id = event.get("user_id")
         email = event.get("email")
         username = event.get("username")
+        event_id = event.get("event_id")
 
         print(f"🎉 New user registered!")
         print(f"   User ID: {user_id}")
         print(f"   Email: {email}")
         print(f"   Username: {username}")
 
-        # TODO: Send welcome email
-        # TODO: Create notification in database
-        # TODO: Send push notification
+        # Save notification to database
+        try:
+            async for session in get_db_session():
+                repo = NotificationRepository(session)
+
+                notification_data = {
+                    "user_id": uuid.UUID(user_id),
+                    "type": NotificationType.IN_APP,
+                    "title": "Welcome to EduPlatform! 🎓",
+                    "message": f"Hi {username}! Thank you for joining EduPlatform. Start exploring our courses and begin your learning journey today!",
+                    "event_type": "user.registered",
+                    "event_id": uuid.UUID(event_id) if event_id else None,
+                }
+
+                notification = await repo.create(notification_data)
+                await repo.mark_as_sent(notification.id)
+                await session.commit()
+
+                print(f"✅ Notification saved to database: {notification.id}")
+
+        except Exception as e:
+            print(f"❌ Error saving notification: {e}")
 
         print(f"✅ Welcome notification sent to {email}")
 
@@ -42,8 +70,8 @@ class UserEventHandler:
 
         print(f"🔐 User logged in: {user_id} via {login_method}")
 
-        # TODO: Log login attempt
-        # TODO: Check for suspicious activity
+        # Could save security notification here if needed
+        # For now, just log it
 
     async def route_event(self, event: dict[str, Any]):
         """

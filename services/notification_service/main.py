@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from shared.messaging.kafka_consumer import KafkaConsumerManager
 
 from .app.handlers.user_events import UserEventHandler
+from .app.routes import notifications
 
 # Global consumer
 consumer: KafkaConsumerManager = None
@@ -69,6 +70,8 @@ def create_app() -> FastAPI:
         redoc_url="/redoc",
         lifespan=lifespan,
     )
+
+    app.include_router(notifications.router, prefix="/api/v1")
 
     # Health check endpoint
     @app.get("/health", tags=["Health"])
