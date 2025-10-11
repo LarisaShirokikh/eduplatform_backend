@@ -17,6 +17,8 @@ sys.path.insert(0, str(project_root))
 from services.course_service.app.models.course import Course
 from services.course_service.app.models.lesson import Lesson
 from services.notification_service.app.models.notification import Notification
+from services.progress_service.app.models.lesson_progress import LessonProgress
+from services.progress_service.app.models.progress import CourseProgress
 
 # Import all models so Alembic can detect them
 # TODO: Uncomment when models are created

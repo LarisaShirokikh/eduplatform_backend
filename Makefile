@@ -263,10 +263,13 @@ run-all-local: ## Запустить все сервисы локально (в 
 	@poetry run uvicorn services.user_service.main:app --port 8001 > logs/user-service.log 2>&1 &
 	@poetry run uvicorn services.course_service.main:app --port 8002 > logs/course-service.log 2>&1 &
 	@poetry run uvicorn services.notification_service.main:app --port 8003 > logs/notification-service.log 2>&1 &
+	@poetry run uvicorn services.progress_service.main:app --port 8004 > logs/progress-service.log 2>&1 &
 	@poetry run uvicorn services.api_gateway.main:app --port 8000 > logs/gateway.log 2>&1 &
 	@echo "$(GREEN)All services started!$(NC)"
 	@echo "User Service: http://localhost:8001/docs"
 	@echo "Course Service: http://localhost:8002/docs"
+	@echo "Notification Service: http://localhost:8003/docs"
+	@echo "Progress Service: http://localhost:8004/docs"
 	@echo "API Gateway: http://localhost:8000/docs"
 	@echo ""
 	@echo "Logs: tail -f logs/*.log"

@@ -105,6 +105,7 @@ async def universal_proxy(request: Request, service: str, path: str = ""):
         "lessons": gateway_config.course_service_url,
         "progress": gateway_config.progress_service_url,
         "notifications": gateway_config.notification_service_url,
+        "progress": gateway_config.progress_service_url,
     }
 
     target_url = service_map.get(service)
