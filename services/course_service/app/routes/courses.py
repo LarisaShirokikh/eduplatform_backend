@@ -297,3 +297,41 @@ async def publish_course(
     await session.commit()
 
     return published_course
+
+
+@router.get(
+    "/{course_id}/lessons",
+    response_model=dict,
+    summary="Get course lessons",
+)
+async def get_course_lessons(
+    course_id: uuid.UUID,
+    session: AsyncSession = Depends(get_db_session),
+):
+    """
+    Get all lessons for a course.
+
+    Returns list of lessons with basic info.
+    """
+    from sqlalchemy import select
+
+    from ..models.lesson import Lesson
+
+    result = await session.execute(
+        select(Lesson).where(Lesson.course_id == course_id).order_by(Lesson.order)
+    )
+    lessons = result.scalars().all()
+
+    return {
+        "course_id": str(course_id),
+        "total": len(lessons),
+        "lessons": [
+            {
+                "id": str(lesson.id),
+                "title": lesson.title,
+                "order": lesson.order,
+                "duration": lesson.duration,
+            }
+            for lesson in lessons
+        ],
+    }

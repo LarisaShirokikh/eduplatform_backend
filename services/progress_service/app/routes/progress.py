@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from shared.database import get_db_session
 from shared.dependencies.auth import get_current_user
 
+from ..clients.course_client import CourseServiceClient
 from ..repositories.progress_repository import ProgressRepository
 from ..schemas.progress import (
     CourseProgressResponse,
@@ -51,9 +52,26 @@ async def enroll_in_course(
             detail="Already enrolled in this course",
         )
 
-    # TODO: Get actual lesson count from Course Service
-    # For now, use placeholder
-    total_lessons = 10
+    # Get course info from Course Service
+    course_client = CourseServiceClient()
+    try:
+        course = await course_client.get_course(enrollment.course_id)
+
+        if not course:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Course not found",
+            )
+
+        # Get lessons count
+        lessons = await course_client.get_course_lessons(enrollment.course_id)
+        total_lessons = len(lessons)
+
+        print(f"📚 Enrolling user {current_user.id} in course: {course.get('title')}")
+        print(f"📖 Total lessons: {total_lessons}")
+
+    finally:
+        await course_client.close()
 
     # Create enrollment
     progress = await repo.enroll_user(
@@ -65,6 +83,7 @@ async def enroll_in_course(
     await session.commit()
 
     # TODO: Emit enrollment.created event to Kafka
+    print(f"✅ User enrolled successfully")
 
     return progress
 
@@ -133,27 +152,66 @@ async def mark_lesson_complete(
     """
     repo = ProgressRepository(session)
 
+    # Get lesson info from Course Service
+    course_client = CourseServiceClient()
+    try:
+        lesson = await course_client.get_lesson(data.lesson_id)
+
+        if not lesson:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Lesson not found",
+            )
+
+        course_id = uuid.UUID(lesson.get("course_id"))
+
+        print(f"📝 Marking lesson complete: {lesson.get('title')}")
+
+    finally:
+        await course_client.close()
+
+    # Get or create course progress
+    course_progress = await repo.get_user_course_progress(current_user.id, course_id)
+
+    if not course_progress:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Not enrolled in this course. Please enroll first.",
+        )
+
     # Get or create lesson progress
     lesson_progress = await repo.get_lesson_progress(current_user.id, data.lesson_id)
 
     if not lesson_progress:
-        # TODO: Get course_id from Lesson Service
-        # For now, return error
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Need to enroll in course first",
+        # Create new lesson progress
+        lesson_progress = await repo.create_lesson_progress(
+            course_progress_id=course_progress.id,
+            user_id=current_user.id,
+            lesson_id=data.lesson_id,
         )
 
-    # Mark as complete
-    lesson_progress = await repo.mark_lesson_complete(lesson_progress.id)
+    # Mark as complete (only if not already completed)
+    if not lesson_progress.is_completed:
+        lesson_progress = await repo.mark_lesson_complete(lesson_progress.id)
+
+        # Update course progress
+        completed_count = course_progress.completed_lessons + 1
+        await repo.update_progress(course_progress.id, completed_count)
+
+        print(
+            f"✅ Lesson completed! Progress: {completed_count}/{course_progress.total_lessons}"
+        )
+
+        # Check if course is completed
+        if completed_count >= course_progress.total_lessons:
+            print(f"🎉 Course completed!")
+            # TODO: Emit course.completed event to Kafka
+            # TODO: Generate certificate
 
     # Update time spent
     lesson_progress.time_spent += data.time_spent
 
     await session.commit()
-
-    # TODO: Update course progress
-    # TODO: Emit progress.updated event to Kafka
 
     return lesson_progress
 
