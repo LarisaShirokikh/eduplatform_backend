@@ -30,6 +30,8 @@ from .progress_events import (
     CertificateRequestedEvent,
     CertificateRevokedEvent,
     CourseCompletedEvent,
+    EnrollmentCreatedEvent,
+    LessonCompletedEvent,
     ProgressUpdatedEvent,
 )
 from .user_events import (
@@ -71,6 +73,7 @@ __all__ = [
     "CertificateRequestedEvent",
     "CertificateIssuedEvent",
     "CertificateRevokedEvent",
+    "EnrollmentCreatedEvent",
     # File events
     "FileUploadedEvent",
     "VideoProcessingStartedEvent",

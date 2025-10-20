@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from shared.config import config
+from shared.messaging.kafka_producer import get_kafka_producer
 
 from .app.routes import progress
 
@@ -17,7 +18,25 @@ from .app.routes import progress
 async def lifespan(app: FastAPI):
     """Startup and shutdown events."""
     print("🚀 Starting Progress Service...")
-    yield
+
+    # Start Kafka producer (optional for development)
+    kafka_producer = None
+    try:
+        kafka_producer = await get_kafka_producer()
+        await kafka_producer.start()
+        print("✅ Kafka producer started")
+    except Exception as e:
+        print(f"⚠️  Kafka unavailable: {e}")
+        print("⚠️  Running without event publishing")
+
+    yield  # Только один yield!
+
+    # Stop Kafka producer
+    if kafka_producer:
+        try:
+            await kafka_producer.stop()
+        except:
+            pass
     print("🛑 Shutting down Progress Service...")
 
 
